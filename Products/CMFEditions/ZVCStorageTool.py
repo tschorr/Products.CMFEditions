@@ -37,6 +37,7 @@ from BTrees.OOBTree import OOBTree
 from BTrees.IOBTree import IOBTree
 from Persistence import Persistent
 from AccessControl import ClassSecurityInfo
+from Acquisition import ImplicitAcquisitionWrapper
 
 from OFS.SimpleItem import SimpleItem
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
@@ -61,6 +62,7 @@ from Products.CMFEditions.interfaces.IStorage import StorageSaveError
 from Products.CMFEditions.interfaces.IStorage import StorageRetrieveError
 from Products.CMFEditions.interfaces.IStorage import StorageUnregisteredError
 from Products.CMFEditions.interfaces.IStorage import StoragePurgeError
+from Products.CMFEditions.utilities import dereference
 
 logger = logging.getLogger('CMFEditions')
 
@@ -413,6 +415,22 @@ class ZVCStorageTool(UniqueObject, SimpleItem):
             self._shadowStorage = ShadowStorage()
         return self._shadowStorage
 
+    def getHistoryMetadata(self, obj=None, history_id=None):
+        """ Return the metadata blob from ShadowHistory for presenting
+            summary information, etc. If obj is not supplied, history
+            is found by history_id, if history_id is not supplied, history
+            is found by obj. If neither, return None.
+        """
+        if obj is None and history_id is None:
+            return [] 
+        else:
+            obj, history_id = dereference(obj=obj, history_id=history_id, zodb_hook=self)
+            hist = self._getShadowHistory(history_id)
+            if hist is None:
+                return []
+            else:
+                return ImplicitAcquisitionWrapper(hist, self)
+
     def _getShadowHistory(self, history_id, autoAdd=False):
         """Returns a History from the Shadow Storage
         """
@@ -764,6 +782,8 @@ InitializeClass(ShadowStorage)
 class ShadowHistory(Persistent):
     """Purge Aware History for Storage Related Metadata
     """
+    security = ClassSecurityInfo()
+
     def __init__(self):
         # Using a IOBtree as we know the selectors are integers.
         # The full history contains shadow data for every saved version. 
@@ -799,6 +819,7 @@ class ShadowHistory(Persistent):
         
         return version_id
 
+    security.declareProtected(ManagePortal, 'retrieve')
     def retrieve(self, selector, countPurged):
         """Retrieves the Selected Data From the History
         
@@ -842,6 +863,10 @@ class ShadowHistory(Persistent):
             return self.nextVersionId
         else:
             return len(self._available)
+
+    def __len__(self):
+        # Policy: The length is the entire length, including purged
+        return self.getLength(True)
 
     def getSize(self):
         """Returns the size including the quality of the size

@@ -612,11 +612,11 @@ class CopyModifyMergeRepositoryTool(UniqueObject,
         """ Reindex the object, otherwise the catalog will certainly
         be out of sync."""
         portal_catalog = getToolByName(self, 'portal_catalog')
-        portal_catalog.reindexObject(obj)
+        portal_catalog.indexObject(obj)
         # XXX: In theory we should probably be emitting IObjectModified and
         # IObjectMoved events here as those are the possible consequences of a
         # revert. Perhaps in out current meager z2 existence we should do
-        # obj.manage_afterRename()?  Also, should we be doing obj.reindexObject()
+        # obj.manage_afterRename()?  Also, should we be doing obj.indexObject()
         # instead to make sure we maximally cover specialized classes which want
         # to handle their cataloging in special ways.
 
