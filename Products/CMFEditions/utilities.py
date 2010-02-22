@@ -96,13 +96,7 @@ def isObjectChanged(obj):
     if getattr(aq_base(obj), 'version_id', None) is None:
         changed = True
     else:
-        try:
-            changed = not pr.isUpToDate(obj, obj.version_id)
-        except ArchivistUnregisteredError:
-            # The object is not actually registered, but a version is
-            # set, perhaps it was imported, or versioning info was
-            # inappropriately destroyed
-            changed = True
+        changed = obj._p_changed
     return changed
 
 def maybeSaveVersion(obj, policy='at_edit_autoversion', comment='', force=False):
