@@ -658,7 +658,7 @@ class ZVCStorageTool(UniqueObject, SimpleItem):
             if shadowStorage is not None:
                 size, sizeState = shadowStorage.getSize()
 
-            workingCopy = hidhandler.queryObject(hid)
+            workingCopy = hidhandler.unrestrictedQueryObject(hid)
             if workingCopy is not None:
                 url = workingCopy.absolute_url()
                 path = url[portal_paths_len:]
