@@ -492,24 +492,17 @@ class ZVCStorageTool(UniqueObject, SimpleItem):
     def _retrieveZVCLogEntry(self, zvc_histid, zvc_selector):
         """Retrieves the metadata from ZVCs log
 
-        Unfortunately this may get costy with long histories.
-        We should really store metadata in the shadow storage in the
-        future or loop over the log in reverse.
+        Loop over the log in reverse to speed things up.
 
         XXX also store (only store) the metadata in the shadow before 1.0beta1
         """
         zvc_repo = self._getZVCRepo()
-        log = zvc_repo.getVersionHistory(zvc_histid).getLogEntries()
+        log = list(zvc_repo.getVersionHistory(zvc_histid).getLogEntries())
+        log.reverse()
         checkin = LogEntry.ACTION_CHECKIN
-        entries = [e for e in log if e.version_id==zvc_selector and e.action==checkin]
-
-        # just make a log entry if something wrong happened
-        if len(entries) != 1:
-            logger.log(logging.INFO, "CMFEditions ASSERT:"
-                     "Uups, an object has been stored %s times with the same "
-                     "history '%s'!!!" % (len(entries), zvc_selector))
-
-        return entries[0]
+        entry = log[int(zvc_selector) - 1]
+        assert entry.action == checkin
+        return entry
 
     def _encodeMetadata(self, metadata):
         # metadata format is:
