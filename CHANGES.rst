@@ -1,10 +1,31 @@
 Changelog
 =========
 
-2.2.15 (unreleased)
+2.2.17 (unreleased)
 -------------------
 
 - use unrestricted search for storage statistics [tschorr]
+New:
+
+- *add item here*
+
+Fixes:
+
+- *add item here*
+
+
+2.2.16 (2015-09-27)
+-------------------
+
+- Input sanitation for retrieveSubstitute()
+  [zupo]
+
+
+2.2.15 (2015-09-15)
+-------------------
+
+- use unrestricted search for storage statistics
+  [tschorr]
 
 
 2.2.14 (2015-08-13)
